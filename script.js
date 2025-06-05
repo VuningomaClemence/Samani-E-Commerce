@@ -192,3 +192,11 @@ function showNotification(message, type = "success") {
     notif.remove();
   }, 2200);
 }
+
+document.querySelectorAll("a").forEach((link) => {
+  if (
+    link.href.split("/").pop() === window.location.pathname.split("/").pop()
+  ) {
+    link.classList.add("active");
+  }
+});
