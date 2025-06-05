@@ -45,11 +45,4 @@ Bienvenue sur **Samani E-Commerce**, une boutique en ligne moderne dédiée à l
 
 - [Vuningoma Clémence](https://github.com/VuningomaClemence)
 
-## 📞 Contact
-
-- Email : contact@Samani.com
-- Téléphone : +243 977406714
-
----
-
 > Samani E-Commerce – Votre destination premium pour des meubles alliant design et confort.
