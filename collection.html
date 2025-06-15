@@ -35,6 +35,8 @@
                 <span class="cart-count">0</span>
               </a>
             </li>
+            <li id="nav-admin-container" style="display: none;"><a href="admin.html" class="btn">Ajouter Produit</a></li>
+            <li id="nav-auth-container"><a href="login.html" class="btn">Connexion</a></li>
           </ul>
         </nav>
       </div>
@@ -264,11 +266,11 @@
             <div class="product-image">
               <img
                 src="https://tse2.mm.bing.net/th/id/OIP.HeIwe0eLQ4E_kdsr80TckAHaFa?rs=1&pid=ImgDetMain"
-                alt="Canapé d’angle BOSTON"
+                alt="Canapé d'angle BOSTON"
               />
             </div>
             <div class="product-info">
-              <h3 class="product-title">Canapé d’angle BOSTON</h3>
+              <h3 class="product-title">Canapé d'angle BOSTON</h3>
               <div class="product-rating">
                 <i class="fas fa-star"></i><i class="fas fa-star"></i
                 ><i class="fas fa-star"></i><i class="fas fa-star"></i
@@ -330,11 +332,11 @@
             <div class="product-image">
               <img
                 src="https://tse2.mm.bing.net/th/id/OIP.ZGI6c6lfs3qsM-jFGfl7QQHaE0?w=1575&h=1024&rs=1&pid=ImgDetMain"
-                alt="Canapé d’angle OSLO"
+                alt="Canapé d'angle OSLO"
               />
             </div>
             <div class="product-info">
-              <h3 class="product-title">Canapé d’angle OSLO</h3>
+              <h3 class="product-title">Canapé d'angle OSLO</h3>
               <div class="product-rating">
                 <i class="fas fa-star"></i><i class="fas fa-star"></i
                 ><i class="fas fa-star"></i><i class="far fa-star"></i
@@ -373,11 +375,11 @@
             <div class="product-image">
               <img
                 src="https://www.mobilierdefrance.com/10559/canape-dangle-modulable-spacer.jpg"
-                alt="Canapé d’angle LUXURY"
+                alt="Canapé d'angle LUXURY"
               />
             </div>
             <div class="product-info">
-              <h3 class="product-title">Canapé d’angle LUXURY</h3>
+              <h3 class="product-title">Canapé d'angle LUXURY</h3>
               <div class="product-rating">
                 <i class="fas fa-star"></i><i class="fas fa-star"></i
                 ><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i
@@ -438,12 +440,12 @@
             <div class="product-image">
               <img
                 src="https://cdn.laredoute.com/products/641by641/e/e/2/ee2740b21f94386841a6f85018bd4c92.jpg"
-                alt="Canapé d’angle convertible Laredoute"
+                alt="Canapé d'angle convertible Laredoute"
               />
             </div>
             <div class="product-info">
               <h3 class="product-title">
-                Canapé d’angle convertible Laredoute
+                Canapé d'angle convertible Laredoute
               </h3>
               <div class="product-rating">
                 <i class="fas fa-star"></i><i class="fas fa-star"></i
@@ -949,6 +951,17 @@
         </div>
       </div>
     </footer>
-    <script src="script.js"></script>
+    <script src="script.js"></script>    
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <!-- Notre script de configuration Firebase -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Script de la page collection et du panier -->
+    <script src="collection.js"></script>
+    <script src="cart.js"></script>
   </body>
 </html>

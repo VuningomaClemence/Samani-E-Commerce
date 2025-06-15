@@ -1,202 +1,155 @@
-document.addEventListener("DOMContentLoaded", function () {
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const cartCountSpan = document.querySelector(".cart-count");
+document.addEventListener('DOMContentLoaded', () => {
+    // Attendre que firebase-config.js soit chargé et que l'objet firebase soit disponible
+    const checkFirebase = setInterval(() => {
+        if (typeof firebase !== 'undefined' && firebase.app) {
+            clearInterval(checkFirebase);
+            initializeApp();
+        }
+    }, 100);
 
-  function updateCartCount() {
-    if (cartCountSpan)
-      cartCountSpan.textContent = cart.reduce((acc, item) => acc + item.qty, 0);
-  }
+    function initializeApp() {
+        const db = firebase.firestore();
+        const auth = firebase.auth();
 
-  function saveCart(newCart) {
-    localStorage.setItem("cart", JSON.stringify(newCart));
-    cart = newCart;
-    updateCartCount();
-  }
+        const navAuthContainer = document.getElementById('nav-auth-container');
+        const navAdminContainer = document.getElementById('nav-admin-container');
+        const productGrid = document.querySelector('.product-grid');
 
-  function displayCart() {
-    const cartItems = JSON.parse(localStorage.getItem("cart")) || [];
-    const cartItemsDiv = document.getElementById("cart-items");
-    const cartTotalDiv = document.getElementById("cart-total");
-    cartItemsDiv.innerHTML = "";
-    let total = 0;
+        // Logique de l'UI globale (header, etc.)
+        const navAuthButton = document.getElementById('nav-auth-btn');
 
-    if (cartItems.length === 0) {
-      cartItemsDiv.innerHTML = "<p>Votre panier est vide.</p>";
-      cartTotalDiv.innerHTML = "";
-      return;
-    }
+        // Gérer l'état de l'authentification et l'affichage des boutons
+        auth.onAuthStateChanged(async (user) => {
+            if (user) {
+                // Utilisateur connecté
+                const userDoc = await db.collection('clients').doc(user.uid).get();
+                const prenom = userDoc.exists ? userDoc.data().prenom : user.email;
+                
+                navAuthContainer.innerHTML = `
+                    <span class="welcome-message">Bonjour, ${prenom}</span>
+                    <a href="#" class="btn" id="logout-btn">Déconnexion</a>
+                `;
+                
+                const logoutBtn = document.getElementById('logout-btn');
+                logoutBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    auth.signOut();
+                });
 
-    cartItems.forEach((item, idx) => {
-      const itemTotal = item.price * item.qty;
-      total += itemTotal;
-      cartItemsDiv.innerHTML += `
-        <div class="product-card">
+                // Vérifier si l'utilisateur est un admin
+                try {
+                    const adminDoc = await db.collection('admin_ids').doc('admin_ids').get();
+                    if (adminDoc.exists) {
+                        const adminEmails = adminDoc.data().admin_list || [];
+                        if (adminEmails.includes(user.email)) {
+                            navAdminContainer.style.display = 'list-item';
+                        } else {
+                            navAdminContainer.style.display = 'none';
+                        }
+                    } else {
+                        console.log("Le document 'admin_ids' n'existe pas.");
+                        navAdminContainer.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error("Erreur lors de la vérification du statut admin:", error);
+                    navAdminContainer.style.display = 'none';
+                }
+
+                navAuthButton.textContent = 'Déconnexion';
+                navAuthButton.href = '#';
+                navAuthButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    auth.signOut().then(() => {
+                        window.location.reload(); // Recharger pour rafraîchir l'état
+                    });
+                });
+            } else {
+                // Utilisateur déconnecté
+                navAuthContainer.innerHTML = `
+                    <a href="login.html" class="btn">Connexion</a>
+                `;
+                navAdminContainer.style.display = 'none';
+
+                navAuthButton.textContent = 'Connexion';
+                navAuthButton.href = 'login.html';
+            }
+        });
+
+        // --- PRODUCT DISPLAY ---
+        const displayProducts = async () => {
+            if (!productGrid) {
+                return; // Ne rien faire si la grille de produits n'est pas sur la page
+            }
+
+            const productsRef = db.collection('produits');
+            try {
+                // Limiter le nombre de produits sur la page d'accueil
+                const snapshot = await productsRef.limit(4).get(); 
+                let html = '';
+                snapshot.forEach(doc => {
+                    const product = doc.data();
+                    const productId = doc.id;
+                    html += `
+                        <div class="product-card" data-id="${productId}">
           <div class="product-image">
-            <img src="${
-              item.image || "https://via.placeholder.com/100x100"
-            }" alt="${item.name}">
+                                <img src="${product.image}" alt="${product.nomProduit}">
           </div>
           <div class="product-info">
-            <h3 class="product-title">${item.name}</h3>
-            <div class="product-price">${item.price.toFixed(2)} $</div>
-            <div style="display:flex;align-items:center;gap:10px;">
-              <button class="qty-btn" data-idx="${idx}" data-action="decrement">-</button>
-              <span>Quantité : <span class="qty-value">${item.qty}</span></span>
-              <button class="qty-btn" data-idx="${idx}" data-action="increment">+</button>
-            </div>
-            <div>Sous-total : <span class="item-total">${itemTotal.toFixed(
-              2
-            )} $</span></div>
-            <div style="margin-top:10px;display:flex;gap:10px;">
-              <button class="btn btn-primary validate-btn" data-idx="${idx}">Valider</button>
-              <button class="btn btn-secondary remove-btn" data-idx="${idx}">Annuler</button>
-            </div>
+                                <h3 class="product-title">${product.nomProduit}</h3>
+                                <div class="product-price">${product.prix} $</div>
+                                <button class="btn add-to-cart">Ajouter au panier</button>
           </div>
         </div>
       `;
     });
+                productGrid.innerHTML = html;
+            } catch (error) {
+                console.error("Erreur lors de la récupération des produits :", error);
+                productGrid.innerHTML = "<p>Impossible de charger les produits pour le moment.</p>";
+            }
+        };
 
-    cartTotalDiv.innerHTML = `<strong>Total à payer: ${total.toFixed(
-      2
-    )} $</strong>`;
+        // Charger les produits phares sur la page d'accueil
+        const displayFeaturedProducts = async () => {
+            const productGrid = document.querySelector('.products .product-grid');
+            if (!productGrid) return;
+            
+            productGrid.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
 
-    // Boutons quantité
-    document.querySelectorAll(".qty-btn").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const idx = parseInt(this.getAttribute("data-idx"));
-        const action = this.getAttribute("data-action");
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        if (action === "increment") {
-          cart[idx].qty += 1;
-        } else if (action === "decrement" && cart[idx].qty > 1) {
-          cart[idx].qty -= 1;
+            try {
+                const snapshot = await db.collection('produits').limit(4).get();
+                let html = '';
+                if (snapshot.empty) {
+                    html = '<p>Aucun produit phare disponible pour le moment.</p>';
+                } else {
+                    snapshot.forEach(doc => {
+                        const product = doc.data();
+                        const productId = doc.id;
+                        html += `
+                            <div class="product-card" data-id="${productId}">
+                                <div class="product-image">
+                                    <img src="${product.image}" alt="${product.nomProduit}">
+                                </div>
+                                <div class="product-info">
+                                    <h3 class="product-title">${product.nomProduit}</h3>
+                                    <p>${product.description || ''}</p>
+                                    <div class="product-price">${product.prix} $</div>
+                                    <button class="btn add-to-cart">Ajouter au panier</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                productGrid.innerHTML = html;
+            } catch (error) {
+                console.error("Erreur de chargement des produits phares:", error);
+                productGrid.innerHTML = '<p>Impossible de charger les produits.</p>';
+            }
+        };
+
+        // Lancer l'affichage des produits
+        if (window.location.pathname.includes('index.html') || window.location.pathname === '/') {
+            displayFeaturedProducts();
         }
-        saveCart(cart);
-        displayCart();
-      });
-    });
-
-    // Bouton annuler (supprimer le produit)
-    document.querySelectorAll(".remove-btn").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const idx = parseInt(this.getAttribute("data-idx"));
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        cart.splice(idx, 1);
-        saveCart(cart);
-        displayCart();
-      });
-    });
-
-    // Bouton valider (valider ce produit)
-    document.querySelectorAll(".validate-btn").forEach((btn) => {
-      btn.addEventListener("click", function () {
-        const idx = parseInt(this.getAttribute("data-idx"));
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        showNotification(
-          "Merci pour votre commande du produit : " + cart[idx].name,
-          "success"
-        );
-        cart.splice(idx, 1); // Retire le produit validé du panier
-        saveCart(cart);
-        displayCart();
-      });
-    });
-  }
-
-  function addToCart(product) {
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const found = cart.find((item) => item.name === product.name);
-    if (found) {
-      found.qty += 1;
-    } else {
-      cart.push({ ...product, qty: 1 });
     }
-    saveCart(cart);
-    showNotification("Produit ajouté au panier !", "success");
-  }
-
-  document.querySelectorAll(".add-to-cart").forEach((btn) => {
-    btn.addEventListener("click", function () {
-      const card = btn.closest(".product-card");
-      const name = card.querySelector(".product-title").textContent;
-      const price = parseFloat(
-        card.querySelector(".product-price").textContent.replace(/[^0-9.]/g, "")
-      );
-      const image = card.querySelector("img")
-        ? card.querySelector("img").src
-        : "";
-      addToCart({ name, price, image });
-    });
-  });
-
-  // Affichage du panier sur panier.html
-  if (window.location.pathname.includes("panier.html")) {
-    displayCart();
-
-    // Bouton annuler la commande
-    const checkoutBtn = document.getElementById("checkout-btn");
-    let cancelBtn = document.getElementById("cancel-btn");
-    if (!cancelBtn) {
-      cancelBtn = document.createElement("button");
-      cancelBtn.textContent = "Annuler la commande";
-      cancelBtn.className = "btn btn-secondary";
-      cancelBtn.id = "cancel-btn";
-      cancelBtn.style.marginLeft = "10px";
-      checkoutBtn.after(cancelBtn);
-    }
-
-    cancelBtn.addEventListener("click", function () {
-      localStorage.removeItem("cart");
-      displayCart();
-      updateCartCount();
-    });
-
-    checkoutBtn.addEventListener("click", function () {
-      showNotification("Merci pour votre commande !", "success");
-      localStorage.removeItem("cart");
-      displayCart();
-      updateCartCount();
-    });
-  }
-
-  updateCartCount();
-
-  // Mise en surbrillance du lien actif
-  const links = document.querySelectorAll("a");
-  const currentPath = window.location.pathname;
-  links.forEach((link) => {
-    if (link.getAttribute("href") === currentPath.split("/").pop()) {
-      link.classList.add("active");
-    }
-  });
-});
-
-// Affiche une notification moderne en haut à droite
-function showNotification(message, type = "success") {
-  let notif = document.createElement("div");
-  notif.className = `custom-notif ${type}`;
-  notif.textContent = message;
-  notif.style.position = "fixed";
-  notif.style.top = "30px";
-  notif.style.right = "30px";
-  notif.style.background = type === "success" ? "#27ae60" : "#e74c3c";
-  notif.style.color = "#fff";
-  notif.style.padding = "14px 24px";
-  notif.style.borderRadius = "8px";
-  notif.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
-  notif.style.zIndex = 9999;
-  notif.style.fontSize = "1rem";
-  notif.style.opacity = "0.95";
-  document.body.appendChild(notif);
-  setTimeout(() => {
-    notif.remove();
-  }, 2200);
-}
-
-document.querySelectorAll("a").forEach((link) => {
-  if (
-    link.href.split("/").pop() === window.location.pathname.split("/").pop()
-  ) {
-    link.classList.add("active");
-  }
 });

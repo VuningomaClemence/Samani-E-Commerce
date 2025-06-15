@@ -34,7 +34,8 @@
                 <span class="cart-count">0</span>
               </a>
             </li>
-            <li><a href="#" class="btn">Connexion</a></li>
+            <li id="nav-admin-container" style="display: none;"><a href="admin.html" class="btn">Ajouter Produit</a></li>
+            <li id="nav-auth-container"><a href="login.html" class="btn">Connexion</a></li>
           </ul>
         </nav>
       </div>
@@ -239,7 +240,6 @@
       </div>
     </section>
 
-  
     <footer>
       <div class="container">
         <div class="footer-grid">
@@ -297,6 +297,16 @@
       </div>
     </footer>
 
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <!-- Notre script de configuration Firebase -->
+    <script src="firebase-config.js"></script>
+
+    <!-- Scripts de l'application -->
     <script src="script.js"></script>
+    <script src="cart.js"></script>
   </body>
 </html>
