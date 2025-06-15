@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Samani - Panier</title>
+    <title>Votre Panier - Samani</title>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
@@ -23,7 +23,7 @@
             <li><a href="armoire.html">Armoires</a></li>
             <li><a href="promotion.html">Promotions</a></li>
             <li>
-              <a href="panier.html" class="btn" id="nav-auth-btn">
+              <a href="panier.html" class="cart-icon active">
                 <i class="fas fa-shopping-cart"></i>
                 <span class="cart-count">0</span>
               </a>
@@ -35,18 +35,12 @@
       </div>
     </header>
 
-    <main class="container">
-      <h1 class="page-title">Votre Panier</h1>
-      <div id="cart-items-container">
-        <!-- Les articles du panier seront injectés ici -->
-      </div>
-      <div id="cart-summary">
-        <div id="cart-total">Total: 0.00 $</div>
-        <button id="checkout-btn" class="btn btn-primary">Passer la commande</button>
-      </div>
-      <div id="empty-cart-message" style="display: none;">
-         <p>Votre panier est vide.</p>
-         <a href="collection.html" class="btn">Continuer mes achats</a>
+    <main class="cart-page-container container">
+      <h1 class="section-title">Votre Panier</h1>
+      <div id="cart-content">
+        <div class="loader-container">
+          <div class="loader"></div>
+        </div>
       </div>
     </main>
 
@@ -102,7 +96,7 @@
           </div>
         </div>
         <div class="copyright">
-          <p>&copy; 2025samani. Tous droits réservés.</p>
+          <p>&copy; 2025 Samani. Tous droits réservés.</p>
         </div>
       </div>
     </footer>
@@ -112,9 +106,10 @@
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
 
-    <!-- Config et scripts de la page -->
+    <!-- Config et scripts -->
     <script src="firebase-config.js"></script>
-    <script src="cart.js"></script> 
+    <script src="script.js"></script>
+    <script src="cart.js"></script>
     <script src="panier-page.js"></script>
   </body>
 </html>

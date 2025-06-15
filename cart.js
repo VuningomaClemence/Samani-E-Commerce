@@ -13,35 +13,6 @@ function initializeCart() {
     const auth = firebase.auth();
     const db = firebase.firestore();
 
-    // Fonction pour ajouter un produit au panier
-    async function addToCart(productId, productData) {
-        const user = auth.currentUser;
-        if (user) {
-            // Utilisateur connecté : ajouter au panier Firestore
-            const cartRef = db.collection('clients').doc(user.uid).collection('panier').doc(productId);
-            const doc = await cartRef.get();
-            if (doc.exists) {
-                // Le produit est déjà dans le panier, incrémenter la quantité
-                await cartRef.update({ quantite: firebase.firestore.FieldValue.increment(1) });
-            } else {
-                // Nouveau produit dans le panier
-                await cartRef.set({ ...productData, quantite: 1, addedAt: new Date() });
-            }
-            showNotification('Produit ajouté au panier !');
-        } else {
-            // Utilisateur non connecté : utiliser localStorage
-            let localCart = JSON.parse(localStorage.getItem('panier')) || {};
-            if (localCart[productId]) {
-                localCart[productId].quantite++;
-            } else {
-                localCart[productId] = { ...productData, quantite: 1 };
-            }
-            localStorage.setItem('panier', JSON.stringify(localCart));
-            showNotification('Produit ajouté au panier !');
-        }
-        updateCartCount();
-    }
-
     // Mettre à jour le compteur du panier dans la nav
     async function updateCartCount() {
         const user = auth.currentUser;
@@ -54,9 +25,6 @@ function initializeCart() {
             snapshot.forEach(doc => {
                 totalItems += doc.data().quantite;
             });
-        } else {
-            const localCart = JSON.parse(localStorage.getItem('panier')) || {};
-            totalItems = Object.values(localCart).reduce((sum, item) => sum + item.quantite, 0);
         }
         cartCountSpan.textContent = totalItems;
     }
@@ -64,30 +32,52 @@ function initializeCart() {
     // Attacher l'événement 'click' aux boutons "Ajouter au panier"
     document.body.addEventListener('click', async (e) => {
         if (e.target.classList.contains('add-to-cart')) {
+            const user = auth.currentUser;
+
+            if (!user) {
+                showNotification("Veuillez vous connecter pour ajouter des articles.", "error");
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 1500);
+                return;
+            }
+
             const productCard = e.target.closest('.product-card');
+            if (!productCard) return;
             const productId = productCard.dataset.id;
             
-            // On a besoin des infos du produit. Idéalement, elles sont déjà chargées.
-            // Pour simplifier, on va les chercher à nouveau dans la DB.
-            const productDoc = await db.collection('produits').doc(productId).get();
-            if(productDoc.exists){
-                const productData = {
-                    nomProduit: productDoc.data().nomProduit,
-                    prix: productDoc.data().prix,
-                    image: productDoc.data().image
-                };
-                addToCart(productId, productData);
-            } else {
-                console.error("Produit non trouvé !");
+            try {
+                const productDoc = await db.collection('produits').doc(productId).get();
+                if (productDoc.exists) {
+                    const productData = {
+                        nomProduit: productDoc.data().nomProduit,
+                        prix: productDoc.data().prix,
+                        image: productDoc.data().image
+                    };
+
+                    const cartRef = db.collection('clients').doc(user.uid).collection('panier').doc(productId);
+                    const doc = await cartRef.get();
+                    
+                    if (doc.exists) {
+                        await cartRef.update({ quantite: firebase.firestore.FieldValue.increment(1) });
+                    } else {
+                        await cartRef.set({ ...productData, quantite: 1, addedAt: new Date() });
+                    }
+                    showNotification('Produit ajouté au panier !');
+                    updateCartCount();
+                } else {
+                    showNotification("Produit non trouvé !", "error");
+                }
+            } catch (error) {
+                console.error("Erreur lors de l'ajout au panier:", error);
+                showNotification("Une erreur s'est produite.", "error");
             }
         }
     });
 
-    // Mettre à jour le compteur au chargement de la page
+    // Mettre à jour le compteur au chargement de la page et lors d'un changement d'état de connexion
     auth.onAuthStateChanged(() => {
         updateCartCount();
-        // Logique de fusion du panier local vers Firestore lors de la connexion
-        // (à implémenter)
     });
 }
 
