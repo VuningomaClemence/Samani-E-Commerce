@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const displayAllProducts = async () => {
+            productGrid.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
             const productsRef = db.collection('produits');
             try {
                 const snapshot = await productsRef.get();

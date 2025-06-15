@@ -46,6 +46,44 @@
             text-align: center;
             margin-top: 15px;
         }
+        .btn.loading .btn-text {
+            display: none;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .auth-separator {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 0 20px;
+            color: #aaa;
+        }
+        .auth-separator::before,
+        .auth-separator::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #ddd;
+        }
+        .auth-separator:not(:empty)::before {
+            margin-right: .25em;
+        }
+        .auth-separator:not(:empty)::after {
+            margin-left: .25em;
+        }
+        .btn .spinner {
+            display: none;
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin: 0 auto;
+        }
+        .btn.loading .spinner {
+            display: block;
+        }
     </style>
 </head>
 <body>
@@ -57,10 +95,15 @@
         <form id="login-form">
             <input type="email" id="login-email" placeholder="Email" required>
             <input type="password" id="login-password" placeholder="Mot de passe" required>
-            <button type="submit" class="btn btn-primary">Se connecter</button>
+            <button type="submit" class="btn btn-primary" id="login-btn">
+                <span class="btn-text">Se connecter</span>
+                <div class="spinner"></div>
+            </button>
             <p id="login-error" class="error-message"></p>
         </form>
     </div>
+
+    <div class="auth-separator">OU</div>
 
     <!-- Formulaire d'Inscription -->
     <div class="form-container" id="signup-form-container">
@@ -72,7 +115,10 @@
             <input type="password" id="signup-password" placeholder="Mot de passe (6 caractères min.)" required>
             <input type="tel" id="signup-telephone" placeholder="Téléphone">
             <textarea id="signup-adresse" placeholder="Adresse de livraison" rows="3"></textarea>
-            <button type="submit" class="btn btn-primary">S'inscrire</button>
+             <button type="submit" class="btn btn-primary" id="signup-btn">
+                <span class="btn-text">S'inscrire</span>
+                <div class="spinner"></div>
+            </button>
             <p id="signup-error" class="error-message"></p>
         </form>
     </div>

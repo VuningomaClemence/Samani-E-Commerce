@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const displayCategoryProducts = async () => {
+            productGrid.innerHTML = '<div class="loader-container"><div class="loader"></div></div>'; // Afficher le loader
             const productsRef = db.collection('produits');
             try {
                 const snapshot = await productsRef.where('categorie', '==', categoryName).get();

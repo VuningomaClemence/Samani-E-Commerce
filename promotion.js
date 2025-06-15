@@ -16,9 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const displayAllProducts = async () => {
-            const productsRef = db.collection('produits');
+            productGrid.innerHTML = '<div class="loader-container"><div class="loader"></div></div>';
+            const productsRef = db.collection('produits').where('promotion', '==', true);
             try {
-                const snapshot = await productsRef.where('promotion', '==', true).get();
+                const snapshot = await productsRef.get();
                 let html = '';
                 if (snapshot.empty) {
                     html = "<p>Aucun produit trouvé dans la collection.</p>";
@@ -43,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 productGrid.innerHTML = html;
             } catch (error) {
-                console.error("Erreur lors de la récupération des produits de la collection :", error);
-                productGrid.innerHTML = "<p>Impossible de charger les produits pour le moment.</p>";
+                console.error("Erreur lors de la récupération des produits en promotion :", error);
+                productGrid.innerHTML = "<p>Impossible de charger les promotions.</p>";
             }
         };
 
