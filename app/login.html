@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Connexion / Inscription - Samani</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+      }
+      .auth-page-container {
+        display: flex;
+        gap: 40px;
+      }
+      .form-container {
+        background: #fff;
+        padding: 40px;
+        border-radius: 8px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        width: 400px;
+      }
+      .form-container h2 {
+        text-align: center;
+        margin-bottom: 25px;
+      }
+      .form-container input {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+      }
+      .form-container textarea {
+        width: 100%;
+        padding: 12px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        resize: vertical;
+      }
+      .form-container button {
+        width: 100%;
+        padding: 12px;
+        border: none;
+        border-radius: 5px;
+      }
+      .error-message {
+        color: #e74c3c;
+        text-align: center;
+        margin-top: 15px;
+      }
+      .btn.loading .btn-text {
+        display: none;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .auth-separator {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 0 20px;
+        color: #aaa;
+      }
+      .auth-separator::before,
+      .auth-separator::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid #ddd;
+      }
+      .auth-separator:not(:empty)::before {
+        margin-right: 0.25em;
+      }
+      .auth-separator:not(:empty)::after {
+        margin-left: 0.25em;
+      }
+      .btn .spinner {
+        display: none;
+        width: 22px;
+        height: 22px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #fff;
+        animation: spin 1s ease-in-out infinite;
+        margin: 0 auto;
+      }
+      .btn.loading .spinner {
+        display: block;
+      }
+      .tab-btn {
+        background: none;
+        border: none;
+        padding: 12px 0;
+        font-size: 1.1em;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: border-color 0.2s, color 0.2s;
+      }
+      .tab-btn:hover {
+        background: #f0f0f0;
+      }
+      .tab-btn.active {
+        border-bottom: 2.5px solid #3498db;
+        color: #3498db;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="auth-page-container" style="gap: 0">
+      <div class="form-container" id="auth-form-container">
+        <h2 id="form-title">Connexion</h2>
+        <!-- Formulaire de Connexion -->
+        <form id="login-form">
+          <input type="email" id="login-email" placeholder="Email" required />
+          <input
+            type="password"
+            id="login-password"
+            placeholder="Mot de passe"
+            required
+          />
+          <button type="submit" class="btn btn-primary" id="login-btn">
+            <span class="btn-text">Se connecter</span>
+            <div class="spinner"></div>
+          </button>
+          <p id="login-error" class="error-message"></p>
+          <p style="text-align: center; margin-top: 18px">
+            <span>Si vous n'avez pas de compte, </span>
+            <a
+              href="#"
+              id="show-signup"
+              style="
+                color: #3498db;
+                text-decoration: underline;
+                cursor: pointer;
+              "
+              >inscrivez-vous</a
+            >
+          </p>
+        </form>
+        <!-- Formulaire d'Inscription -->
+        <form id="signup-form" style="display: none">
+          <input type="text" id="signup-nom" placeholder="Nom" required />
+          <input type="text" id="signup-prenom" placeholder="Prénom" required />
+          <input type="email" id="signup-email" placeholder="Email" required />
+          <input
+            type="password"
+            id="signup-password"
+            placeholder="Mot de passe (6 caractères min.)"
+            required
+          />
+          <input type="tel" id="signup-telephone" placeholder="Téléphone" />
+          <textarea
+            id="signup-adresse"
+            placeholder="Adresse de livraison"
+            rows="3"
+          ></textarea>
+          <button type="submit" class="btn btn-primary" id="signup-btn">
+            <span class="btn-text">S'inscrire</span>
+            <div class="spinner"></div>
+          </button>
+          <p id="signup-error" class="error-message"></p>
+          <p style="text-align: center; margin-top: 18px">
+            <span>Déjà un compte ? </span>
+            <a
+              href="#"
+              id="show-login"
+              style="
+                color: #3498db;
+                text-decoration: underline;
+                cursor: pointer;
+              "
+              >Connectez-vous</a
+            >
+          </p>
+        </form>
+      </div>
+    </div>
+    <script>
+      const loginForm = document.getElementById("login-form");
+      const signupForm = document.getElementById("signup-form");
+
+      const formTitle = document.getElementById("form-title");
+      const showSignup = document.getElementById("show-signup");
+      const showLogin = document.getElementById("show-login");
+
+      showSignup.onclick = function (e) {
+        e.preventDefault();
+        loginForm.style.display = "none";
+        signupForm.style.display = "";
+        formTitle.textContent = "Inscription";
+      };
+      showLogin.onclick = function (e) {
+        e.preventDefault();
+        signupForm.style.display = "none";
+        loginForm.style.display = "";
+        formTitle.textContent = "Connexion";
+      };
+    </script>
+    <!-- Scripts Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.8/firebase-firestore.js"></script>
+
+    <!-- Config et script d'authentification -->
+    <script src="firebase-config.js"></script>
+    <script src="auth.js"></script>
+  </body>
+</html>
